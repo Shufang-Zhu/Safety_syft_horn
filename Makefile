@@ -2,7 +2,7 @@ SOURCES = main.cpp Horn.cpp
 OBJS = main.o Horn.o
 
 GXX=g++
-GXXFLAGS= -std=c++11 -w -g
+GXXFLAGS=-lspot -std=c++11 -w -g
 
 
 SSyftHorn: $(SOURCES)

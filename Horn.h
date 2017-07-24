@@ -25,6 +25,8 @@ class Horn
         vector<int> edge2bin(vector<string> edge);
         vector<m> trans;
         void print_trans();
+        void print_formula();
+        string int2bin(int n, int num);
         void map_insert(int curstate, vector<int> assignment, int succ);
         vector<string> item2strings(vector<int> line);
 

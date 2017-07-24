@@ -10,6 +10,7 @@ Horn::Horn(string filename, string partfile)
     //ctor
     read_from_file(filename, partfile);
     //print_trans();
+    print_formula();
 
 
 }
@@ -115,10 +116,73 @@ vector<int> Horn::edge2bin(vector<string> edge){
 
 }
 
+string Horn::int2bin(int n, int num){
+    string res;
+    while (n)
+    {
+        res.push_back((n & 1) + '0');
+        n >>= 1;
+    }
+
+    if (res.empty())
+        res = "0";
+    else
+        reverse(res.begin(), res.end());
+    for(int i = res.size(); i < num; i++)
+        res = "0"+res;
+    return res;
+}
+
+
+void Horn::print_formula(){
+    cout<<"p cnf 1000 1000"<<endl;
+    int allinputs = pow(2, input.size());
+    int alloutputs = pow(2, output.size());
+    int offset = nstates+nstates*allinputs;
+    int ps;
+    int psb; //b is input, a is output
+    //psb = nstates+(s-1)*allinputs+input
+    //(s,b) = (psb/allinputs+1,psb%allinputs)
+    int psba;
+    //psba = offset+(s-1)*nb*na + (b-1)*na + output
+    //s = psba/(nb*na)+1
+    //b = (psba-(s-1)*nb*na)/na+1
+    //a = (psba-(s-1)*nb*na)%na
+    //cout<<allinputs<<endl;
+    //cout<<alloutputs<<endl;
+
+    for(int i = 1; i <= nstates; i++){
+        ps = i;
+        for(int j = 1; j <= allinputs; j++){
+            psb = nstates+(ps-1)*allinputs+j;
+            cout<<ps<<" -"<<psb<<" 0"<<endl;
+            cout<<psb<<" ";
+            for(int m = 1; m <= alloutputs; m++){
+                psba = offset+(ps-1)*allinputs*alloutputs + (j-1)*alloutputs + m;
+                cout<<"-"<<psba<<" ";
+            }
+            cout<<"0"<<endl;
+
+            unordered_map<string,int>::const_iterator got;
+            for(int m = 1; m <= alloutputs; m++){
+                psba = offset+(ps-1)*allinputs*alloutputs + (j-1)*alloutputs + m;
+                string sinput = int2bin(j-1,input.size());
+                string soutput = int2bin(m-1,output.size());
+                string label = sinput+soutput;
+
+                got = (*(trans[i-1])).find(label);
+                if(got == (*(trans[i-1])).end())
+                    cout<<psba<<" 0"<<endl;
+                else
+                    cout<<"-"<<psba<<" "<<got->second<<" 0"<<endl;
+            }
+        }
+    }
+}
+
 void Horn::add_edge(string line, int curstate){
     vector<string> field;
     split(field, line, is_any_of(" "));
-    field.pop_back();
     int succesor = stoi(field.back());
     field.pop_back();
 
@@ -222,7 +286,7 @@ void Horn::read_partfile(string partfile){
         else
             cout<<"error"<<endl;
     }
-    print_vec_int(input);
-    print_vec_int(output);
+    //print_vec_int(input);
+    //print_vec_int(output);
 }
 

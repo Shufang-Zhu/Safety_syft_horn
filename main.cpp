@@ -1,5 +1,10 @@
 #include <iostream>
 #include "Horn.h"
+#include "Common.h"
+#include <spot/tl/parse.hh>
+#include <spot/parseaut/public.hh>
+#include <spot/twaalgos/hoa.hh>
+#include <spot/twaalgos/translate.hh>
 
 using namespace std;
 
@@ -8,6 +13,7 @@ int main(int argc, char ** argv)
     string filename;
     string partfile;
     string flag;
+
     /*
     if(argc != 4){
         cout<<"Usage: ./SSyft DFAfile Partfile Starting_player(0: system, 1: environment)"<<endl;
@@ -18,11 +24,33 @@ int main(int argc, char ** argv)
         partfile = argv[2];
         flag = argv[3];
     }*/
-    filename = "load_0.hoa";
+    filename = "load_0.ltl";
     partfile = "load_0.part";
+
+
+    ifstream f(filename);
+    string formula;
+    if(f.is_open())
+        getline(f, formula);
+    f.close();
+
+
+    spot::parsed_formula pf = spot::parse_infix_psl(formula);
+    if (pf.format_errors(std::cerr))
+        return 1;
+    spot::translator trans;
+    trans.set_type(spot::postprocessor::TGBA);
+    trans.set_pref(spot::postprocessor::Deterministic);
+    spot::twa_graph_ptr aut = trans.run(pf.f);
+    ofstream hoa("tmp.hoa");
+    spot::print_hoa(hoa, aut) << '\n';
+    hoa.close();
+
+
     clock_t t1,t2;
     t1=clock();
-    Horn test(filename, partfile);
+    Horn test("tmp.hoa", partfile);
+
     /*
     bool res = 0;
     if(flag == "1")
