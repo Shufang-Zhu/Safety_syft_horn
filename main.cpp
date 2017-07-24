@@ -14,18 +14,18 @@ int main(int argc, char ** argv)
     string partfile;
     string flag;
 
-    /*
-    if(argc != 4){
+    
+    if(argc != 3){
         cout<<"Usage: ./SSyft DFAfile Partfile Starting_player(0: system, 1: environment)"<<endl;
         return 0;
     }
     else{
         filename = argv[1];
         partfile = argv[2];
-        flag = argv[3];
-    }*/
-    filename = "load_0.ltl";
-    partfile = "load_0.part";
+      
+    }
+    //filename = "load_0.ltl";
+    //partfile = "load_0.part";
 
 
     ifstream f(filename);
@@ -50,21 +50,23 @@ int main(int argc, char ** argv)
     clock_t t1,t2;
     t1=clock();
     Horn test("tmp.hoa", partfile);
+    system("minisat -verb=0 hornf res");
+    bool res = test.realizability();
 
-    /*
-    bool res = 0;
-    if(flag == "1")
-        res = test.realizablity_variant();
-    else
-        res = test.realizablity();
+    
+    // bool res = 0;
+    // if(flag == "1")
+    //     res = test.realizablity_variant();
+    // else
+    //     res = test.realizablity();
 
     if(res)
         cout<<"realizable"<<endl;
     else
         cout<<"unrealizable"<<endl;
-    t2=clock();
-    float diff ((float)t2-(float)t1);
-    float seconds = diff / CLOCKS_PER_SEC;
-    cout<<"Syn time: "<<seconds<<endl;*/
+    // t2=clock();
+    // float diff ((float)t2-(float)t1);
+    // float seconds = diff / CLOCKS_PER_SEC;
+    // cout<<"Syn time: "<<seconds<<endl;
     return 0;
 }

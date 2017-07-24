@@ -9,7 +9,7 @@ Horn::Horn(string filename, string partfile)
 {
     //ctor
     read_from_file(filename, partfile);
-    //print_trans();
+    // print_trans();
     print_formula();
 
 
@@ -117,6 +117,7 @@ vector<int> Horn::edge2bin(vector<string> edge){
 }
 
 string Horn::int2bin(int n, int num){
+   
     string res;
     while (n)
     {
@@ -128,6 +129,7 @@ string Horn::int2bin(int n, int num){
         res = "0";
     else
         reverse(res.begin(), res.end());
+    
     for(int i = res.size(); i < num; i++)
         res = "0"+res;
     return res;
@@ -135,7 +137,10 @@ string Horn::int2bin(int n, int num){
 
 
 void Horn::print_formula(){
-    cout<<"p cnf 1000 1000"<<endl;
+    ofstream cnf;
+    cnf.open("hornf");
+    cnf<<"p cnf 1000 1000"<<endl;
+    cnf<<"-1 0"<<endl;
     int allinputs = pow(2, input.size());
     int alloutputs = pow(2, output.size());
     int offset = nstates+nstates*allinputs;
@@ -155,13 +160,13 @@ void Horn::print_formula(){
         ps = i;
         for(int j = 1; j <= allinputs; j++){
             psb = nstates+(ps-1)*allinputs+j;
-            cout<<ps<<" -"<<psb<<" 0"<<endl;
-            cout<<psb<<" ";
+            cnf<<ps<<" -"<<psb<<" 0"<<endl;
+            cnf<<psb<<" ";
             for(int m = 1; m <= alloutputs; m++){
                 psba = offset+(ps-1)*allinputs*alloutputs + (j-1)*alloutputs + m;
-                cout<<"-"<<psba<<" ";
+                cnf<<"-"<<psba<<" ";
             }
-            cout<<"0"<<endl;
+            cnf<<"0"<<endl;
 
             unordered_map<string,int>::const_iterator got;
             for(int m = 1; m <= alloutputs; m++){
@@ -169,16 +174,99 @@ void Horn::print_formula(){
                 string sinput = int2bin(j-1,input.size());
                 string soutput = int2bin(m-1,output.size());
                 string label = sinput+soutput;
-
+                // cout<<i<<" "<<label<<endl;
                 got = (*(trans[i-1])).find(label);
                 if(got == (*(trans[i-1])).end())
-                    cout<<psba<<" 0"<<endl;
+                    cnf<<psba<<" 0"<<endl;
                 else
-                    cout<<"-"<<psba<<" "<<got->second<<" 0"<<endl;
+                    cnf<<"-"<<psba<<" "<<got->second<<" 0"<<endl;
             }
         }
     }
+    cnf.close();
 }
+
+void Horn::get_strategy(string line){
+    vector<string> fields;
+    split(fields, line, is_any_of(" "));
+    //print_vec_string(fields);
+    fields.pop_back();
+    set<int> winningstates;
+    for(int i = 0; i < nstates; i++){
+        unordered_map<string, string>* sio = new unordered_map<string, string>;
+        strategy.push_back(sio);  
+        if(fields[i][0] == '-'){
+            fields[i].erase(0,1);
+            winningstates.insert(stoi(fields[i]));
+        }
+        
+    }
+    int allinputs = pow(2, input.size());
+    int alloutputs = pow(2, output.size());
+    int offset = nstates+nstates*allinputs;
+    //psba = offset+(s-1)*nb*na + (b-1)*na + output
+    //s = psba/(nb*na)+1
+    //b = (psba-(s-1)*nb*na)/na+1
+    //a = (psba-(s-1)*nb*na)%na
+
+    for(int j = offset; j < fields.size(); j++){
+        //cout<<fields[j]<<" ";
+        if(fields[j][0] == '-'){
+            fields[j].erase(0,1);
+            int psba = stoi(fields[j]) - offset;
+            int s = ceil((float)psba/(allinputs*alloutputs));
+            int in = ceil((float)(psba-(s-1)*allinputs*alloutputs)/alloutputs);
+
+            int out = psba-(s-1)*allinputs*alloutputs-(in-1)*alloutputs;
+            
+            string sinput = int2bin(in-1, input.size());
+            string soutput = int2bin(out-1, output.size());
+
+            unordered_map<string,string>::const_iterator got;
+            unordered_map<string,int>::const_iterator winstate;
+            winstate = (*(trans[s-1])).find(sinput+soutput);
+            if(winstate != (*(trans[s-1])).end()){
+                int win = winstate->second;
+                // cout<<win<<endl;
+                if(winningstates.find(win) == winningstates.end()){
+                    // cout<<"not "<<win<<endl;
+                    continue;
+                }
+            }
+
+            got = (*(strategy[s-1])).find(sinput);
+            if(got == (*(strategy[s-1])).end()){
+                strategy_insert(s-1,sinput,soutput);
+                // cout<<psba<<" "<<s<<" "<<sinput<<" "<<soutput<<endl;
+            }
+            else
+                continue;    
+        }
+        
+
+
+    }
+    
+
+}
+
+bool Horn::realizability(){
+    ifstream f("res");
+    if(f.is_open()){
+        string line;
+        while(getline(f, line)){
+            if(line == "UNSAT")
+                return false;
+            else{
+                getline(f,line);
+                get_strategy(line);
+                return true;
+            }
+        }
+    }
+    f.close();
+}
+
 
 void Horn::add_edge(string line, int curstate){
     vector<string> field;
@@ -219,6 +307,12 @@ void Horn::map_insert(int curstate, vector<int> assignment, int succ){
     s = trans[curstate];
     for(int i = 0; i < allassigns.size(); i++)
         (*s).insert({allassigns[i],succ});
+}
+
+void Horn::strategy_insert(int curstate, string sinput, string soutput){
+    unordered_map<string, string>* s;
+    s = strategy[curstate];
+    (*s).insert({sinput,soutput});
 }
 
 vector<string> Horn::item2strings(vector<int> line){

@@ -6,10 +6,12 @@
 using namespace std;
 typedef vector<int> item;
 typedef unordered_map<string, int>* m;
+typedef unordered_map<string, string>* mn;
 class Horn
 {
     public:
         Horn(string filename, string partfile);
+        bool realizability();
         virtual ~Horn();
         int nstates;
         int init;
@@ -28,7 +30,11 @@ class Horn
         void print_formula();
         string int2bin(int n, int num);
         void map_insert(int curstate, vector<int> assignment, int succ);
+        void strategy_insert(int curstate, string sinput, string soutput);
         vector<string> item2strings(vector<int> line);
+        
+        vector<mn> strategy;
+        void get_strategy(string line);
 
         void print_vec_string(vector<string> v){
             for (size_t n = 0; n < v.size(); n++)
