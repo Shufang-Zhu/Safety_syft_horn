@@ -27,7 +27,8 @@ int main(int argc, char ** argv)
     //filename = "load_0.ltl";
     //partfile = "load_0.part";
 
-
+    clock_t t1,t2,t3;
+    t1=clock();
     ifstream f(filename);
     string formula;
     if(f.is_open())
@@ -45,28 +46,28 @@ int main(int argc, char ** argv)
     ofstream hoa("tmp.hoa");
     spot::print_hoa(hoa, aut) << '\n';
     hoa.close();
+    t2=clock();
 
-
-    clock_t t1,t2;
-    t1=clock();
+    
     Horn test("tmp.hoa", partfile);
     system("minisat -verb=0 hornf res");
     bool res = test.realizability();
 
-    
-    // bool res = 0;
-    // if(flag == "1")
-    //     res = test.realizablity_variant();
-    // else
-    //     res = test.realizablity();
 
     if(res)
         cout<<"realizable"<<endl;
     else
         cout<<"unrealizable"<<endl;
-    // t2=clock();
-    // float diff ((float)t2-(float)t1);
-    // float seconds = diff / CLOCKS_PER_SEC;
-    // cout<<"Syn time: "<<seconds<<endl;
+    t3=clock();
+    
+    float dfa ((float)t2-(float)t1);
+    float syn ((float)t3-(float)t2);
+    float total ((float)t3-(float)t1);
+    float dfatime = dfa / CLOCKS_PER_SEC;
+    float syntime = syn / CLOCKS_PER_SEC;
+    float totaltime = total / CLOCKS_PER_SEC;
+    cout<<"DFA time: "<<dfatime<<endl;
+    cout<<"Syn time: "<<syntime<<endl;
+    cout<<"Total time: "<<totaltime<<endl;
     return 0;
 }

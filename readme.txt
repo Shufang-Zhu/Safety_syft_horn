@@ -9,3 +9,6 @@ printing the horn formula
 2017.7.24 0:27am
 reading from ltl file and partfile
 return result
+
+2017.7.24 1:58am
+clock is added

@@ -271,6 +271,15 @@ bool Horn::realizability(){
 void Horn::add_edge(string line, int curstate){
     vector<string> field;
     split(field, line, is_any_of(" "));
+
+    if(strfind(field.back(),"}")){
+        while(true){
+            field.pop_back();
+            if(strfind(field.back(),"{"))
+                break;
+        }
+        field.pop_back();
+    }
     int succesor = stoi(field.back());
     field.pop_back();
 
@@ -306,7 +315,7 @@ void Horn::map_insert(int curstate, vector<int> assignment, int succ){
     unordered_map<string, int>* s;
     s = trans[curstate];
     for(int i = 0; i < allassigns.size(); i++)
-        (*s).insert({allassigns[i],succ});
+        (*s).insert({allassigns[i],succ+1});
 }
 
 void Horn::strategy_insert(int curstate, string sinput, string soutput){
