@@ -35,23 +35,23 @@ int main(int argc, char ** argv)
         getline(f, formula);
     f.close();
 
-
+    //Automata construction
     spot::parsed_formula pf = spot::parse_infix_psl(formula);
     if (pf.format_errors(std::cerr))
         return 1;
     spot::translator trans;
-    trans.set_type(spot::postprocessor::TGBA);
+    trans.set_type(spot::postprocessor::BA);
     trans.set_pref(spot::postprocessor::Deterministic);
     spot::twa_graph_ptr aut = trans.run(pf.f);
-    ofstream hoa("tmp.hoa");
+    ofstream hoa("tmp.hoa"); //Print the automaton
     spot::print_hoa(hoa, aut) << '\n';
     hoa.close();
     t2=clock();
 
-    
+    //Horn formula generation
     Horn test("tmp.hoa", partfile);
-    system("minisat -verb=0 hornf res");
-    bool res = test.realizability();
+    system("minisat -verb=0 hornf res"); //SAT solving
+    bool res = test.realizability(); //Realizability checking
 
 
     if(res)

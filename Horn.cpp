@@ -42,7 +42,7 @@ void Horn::read_from_file(string filename, string partfile){
                     split(fields, line, is_any_of(" "));
                     nstates = stoi(fields[1]);
                 }
-                else if(strfind(line, "init")){
+                else if(strfind(line, "Start")){
                     split(fields, line, is_any_of(" "));
                     init = stoi(fields[1]);
                     //cout<<init<<endl;
@@ -84,6 +84,8 @@ void Horn::read_from_file(string filename, string partfile){
 	}
 	f.close();
 }
+
+
 
 vector<int> Horn::edge2bin(vector<string> edge){
     bool value = 0;
@@ -140,7 +142,8 @@ void Horn::print_formula(){
     ofstream cnf;
     cnf.open("hornf");
     cnf<<"p cnf 1000 1000"<<endl;
-    cnf<<"-1 0"<<endl;
+
+    cnf<<"-"<<(init+1)<<" 0"<<endl;
     int allinputs = pow(2, input.size());
     int alloutputs = pow(2, output.size());
     int offset = nstates+nstates*allinputs;
@@ -176,10 +179,13 @@ void Horn::print_formula(){
                 string label = sinput+soutput;
                 // cout<<i<<" "<<label<<endl;
                 got = (*(trans[i-1])).find(label);
-                if(got == (*(trans[i-1])).end())
+                if(got == (*(trans[i-1])).end()){
                     cnf<<psba<<" 0"<<endl;
-                else
-                    cnf<<"-"<<psba<<" "<<got->second<<" 0"<<endl;
+                }
+                else{
+                    // cnf<<"-"<<psba<<" "<<got->second<<" 0"<<endl;
+                    cnf<<psba<<" -"<<got->second<<" 0"<<endl;
+                }
             }
         }
     }
@@ -198,9 +204,14 @@ void Horn::get_strategy(string line){
         if(fields[i][0] == '-'){
             fields[i].erase(0,1);
             winningstates.insert(stoi(fields[i]));
+            // cout<<stoi(fields[i])-1<<" ";
+        }
+        else {
+            // cout<<"-"<<stoi(fields[i])-1<<" ";
         }
         
     }
+    // cout<<endl;
     int allinputs = pow(2, input.size());
     int alloutputs = pow(2, output.size());
     int offset = nstates+nstates*allinputs;
@@ -237,7 +248,7 @@ void Horn::get_strategy(string line){
             got = (*(strategy[s-1])).find(sinput);
             if(got == (*(strategy[s-1])).end()){
                 strategy_insert(s-1,sinput,soutput);
-                // cout<<psba<<" "<<s<<" "<<sinput<<" "<<soutput<<endl;
+                // cout<<s-1<<" "<<sinput<<" "<<soutput<<endl;
             }
             else
                 continue;    
@@ -269,6 +280,13 @@ bool Horn::realizability(){
 
 
 void Horn::add_edge(string line, int curstate){
+
+
+    if(strfind(line, "t")){
+        line = "[0 | !0] "+ to_string(curstate);   
+    }
+
+    //get the successor
     vector<string> field;
     split(field, line, is_any_of(" "));
 
@@ -284,7 +302,7 @@ void Horn::add_edge(string line, int curstate){
     field.pop_back();
 
 
-
+    //get all transitons
     for(int i = 0; i < field.size(); i++){
         if(field[i] == "|")
             field.erase (field.begin()+i);
@@ -297,7 +315,7 @@ void Horn::add_edge(string line, int curstate){
 
     }
 
-    vector<string> condition;
+    vector<string> condition; //all transitions
     for(int i = 0; i < field.size(); i++){
 
         split(condition, field[i], is_any_of("&"));
