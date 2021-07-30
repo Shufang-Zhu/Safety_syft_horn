@@ -10,11 +10,15 @@ Compilation Instructions
 0.2 Make sure MINISAT is installed.:
     sudo apt-get install minisat
 
+==== Install BOOST ====
+
+0.3 Make sure BOOST is installed.:
+    sudo apt-get install -y libboost-dev
+
 ==== Install SSyftHorn ====
 
 1. Compile using the makefile:
    make
-
 
 ==== Run SSyftHorn ====
 
