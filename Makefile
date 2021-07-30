@@ -1,17 +1,16 @@
-SOURCES = main.cpp Horn.cpp
-OBJS = main.o Horn.o
-
 GXX=g++
-GXXFLAGS=-lspot -std=c++11 -w -g
+GXXFLAGS=-lspot -std=c++17 -w -g
+DEPS = Horn.h
+OBJ = main.o Horn.o
+
+%.o: %.cpp $(DEPS)
+	$(GXX) -c -o $@ $< $(GXXFLAGS)
+
+SSyftHorn: $(OBJ)
+	$(GXX) -o $@ $^ $(GXXFLAGS)
 
 
-SSyftHorn: $(SOURCES)
-	$(GXX) $(SOURCES) $(GXXFLAGS) 
-	$(GXX) -o SSyftHorn $(SOURCES) $(GXXFLAGS) 
+.PHONY: clean
 
-
-
-
-.PHONY: SSyftHorn
 clean:
-	rm  SSyftHorn
+	rm -f *.o *~

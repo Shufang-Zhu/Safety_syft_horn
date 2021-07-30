@@ -1,0 +1,1 @@
+(((G (FALSE  | (!(X(Grant0))) | (Request0)))) & ((G (FALSE  | (!(X(Grant1))) | (Request1)))))

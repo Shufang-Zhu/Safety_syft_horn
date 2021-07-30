@@ -1,0 +1,22 @@
+Compilation Instructions
+
+==== Install SPOT ====
+
+0.1 Make sure SPOT is installed. SPOT can be found at:
+    https://spot.lrde.epita.fr/index.html
+
+==== Install MINISAT ====
+
+0.2 Make sure MINISAT is installed.:
+    sudo apt-get install minisat
+
+==== Install SSyftHorn ====
+
+1. Compile using the makefile:
+   make
+
+
+==== Run SSyftHorn ====
+
+1. Run:
+   ./SSyftHorn formulafile partfile

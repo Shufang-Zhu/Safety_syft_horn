@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
 
     
     if(argc != 3){
-        cout<<"Usage: ./SSyft DFAfile Partfile Starting_player(0: system, 1: environment)"<<endl;
+        cout<<"Usage: ./SSyftHorn formulafile partfile"<<endl;
         return 0;
     }
     else{

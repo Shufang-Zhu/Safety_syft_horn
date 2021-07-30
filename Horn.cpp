@@ -380,11 +380,11 @@ void Horn::read_partfile(string partfile){
         if(f.is_open()){
             if(strfind(line, "inputs")){
                 split(inputs, line, is_any_of(" "));
-                //print_vec_string(inputs);
+//                print_vec_string(inputs);
             }
             else if(strfind(line, "outputs")){
                 split(outputs, line, is_any_of(" "));
-                //print_vec_string(outputs);
+//                print_vec_string(outputs);
             }
             else
                 cout<<"read partfile error!"<<endl;
